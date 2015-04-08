@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="js/react.js"></script>
+    <script src="js/JSXTransformer.js"></script>
+    <script src="js/zepto.min.js"></script>
+    <script src="js/highlight.pack.js"></script>
+    <link rel="stylesheet" href="css/index.css">
+    
+    <link rel="stylesheet" title="Github" href="css/github.css">
+    <link rel="stylesheet" title="Solarized Dark" href="css/solarized_dark.css">
+    <link rel="stylesheet" title="Solarized Light" href="css/solarized_light.css">
+    <link rel="stylesheet" title="IDEA" href="css/idea.css">
+    <link rel="stylesheet" title="Sunburst" href="css/sunburst.css">
+    <link rel="stylesheet" title="Visual Studio" href="css/vs.css">
+  </head>
+  <body>
+    <div id="content"></div>
+    <script type="text/jsx">
+      var supportLanguage = ['python', 'c', 'java'];
+      var HighlightBox = React.createClass({displayName: 'HighilghtBox',
+        getInitialState: function() {
+          return {rawContent: "",
+                  resultMarkup: "",
+                  renderPending: false};
+        },
+        updateResult: function(languageSet) {
+          var text = React.findDOMNode(this.refs.text).value.trim();
+          var language = React.findDOMNode(this.refs.language);
+          this.setState({rawContent: text});
+          if (! this.state.renderPending) {
+            this.setState({renderPending: true});
+            var that = this;
+            setTimeout(function() {
+              var result = hljs.highlightAuto(that.state.rawContent, languageSet);
+              if (supportLanguage.indexOf(result.language) > -1) {
+                  $(language).val(result.language);
+              }
+              that.setState({
+                            resultMarkup: result.value,
+                            renderPending :false});
+            }, 500);
+          }
+        },
+        handleTextareaChange: function() {
+          this.updateResult(supportLanguage);
+        },
+        handleLanguageChange: function() {
+          var language = React.findDOMNode(this.refs.language).value.trim();
+          if (language === 'Auto') {
+            this.updateResult(supportLanguage);
+          } else {
+            this.updateResult([language]);
+          }
+        },
+        handleThemeChange: function() {
+          var theme = React.findDOMNode(this.refs.theme).value.trim();
+          $('link[title]').each(function(i, link) {
+            link.disabled = (link.title != theme);
+          });
+          var language = React.findDOMNode(this.refs.language).value.trim();
+          if (language === 'Auto') {
+            this.updateResult(supportLanguage);
+          } else {
+            this.updateResult([language]);
+          }
+        },
+        handleFontSizeChange: function() {
+            var fontSize = React.findDOMNode(this.refs.fontSize).value;
+            $('div#resultBlock').css('font-size', fontSize + 'px');
+        },
+        render: function() {
+          return (
+            <div className="hbox">
+              <h2>React Code Highlighter</h2>
+              <form className="hform">
+                <p>
+                  <span className="label">Font Size(px):</span>&nbsp;
+                <input name="fontSize" id="formFontSize" type="number" onChange={this.handleFontSizeChange} ref="fontSize">&nbsp; </input> &nbsp;
+                <span className="label">Language: </span>
+                <select onChange={this.handleLanguageChange} ref="language" id="formLanguage">
+                  <option value="Auto">Autodetect</option>
+                  <option value="python">Python</option>
+                  <option value="c">C</option>
+                  <option value="java">Java</option>
+                </select>
+                &nbsp;&nbsp;&nbsp;
+                <span className="label">Theme: </span>
+                <select onChange={this.handleThemeChange} ref="theme" id="formTheme">
+                  <option value="Github">Github</option>
+                  <option value="Solarized Light">Solarized Light</option>
+                  <option value="Solarized Dark">Solarized Dark</option>
+                  <option value="IDEA">IDEA</option>
+                  <option value="Sunburst">Sunburst</option>
+                  <option value="Visual Studio">Visual Studio</option>
+                  
+                </select>
+              </p>
+                <textarea ref="text" id="formTextarea" onChange={this.handleTextareaChange}>
+                </textarea>
+              </form>
+              <div id="resultBlock">
+              <pre ref="block"><code className="hljs" dangerouslySetInnerHTML={{__html: this.state.resultMarkup}} />
+              </pre>
+              </div>
+            </div>
+          );
+        }
+      });
+      
+      React.render(
+        <HighlightBox />,
+        document.getElementById('content')
+      );
+    </script>
+  </body>
+</html>

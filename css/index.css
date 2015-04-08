@@ -1,0 +1,18 @@
+#content {
+        margin: 2em auto;
+        width: 600px;
+}
+
+#formTextarea {
+        width: 600px;
+        height: 300px;
+}
+
+#formFontSize {
+        width: 70px;
+}
+
+.label {
+        font-size: 14px;
+}
+
